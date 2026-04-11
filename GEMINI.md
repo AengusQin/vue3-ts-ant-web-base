@@ -29,8 +29,14 @@ The project uses `npm` as the package manager and `vite` for fast local developm
 
 # Development Conventions
 
+- **Code Quality:** After completing any code changes, you MUST ensure the project compiles successfully without any TypeScript or Vue errors. Run the appropriate build or type-checking command (e.g., `npm run build`), and if errors occur, you must fix them.
+
 ## Architectural & Structural Choices
-- **Routing:** Manual route configuration. New pages should be added to a central routing file rather than relying on auto-generated file-based routing.
+- **Routing:** Manual route configuration. 
+  - **How to add a new page:**
+    1. **Create the Component:** Create your page component in `src/views/<PageName>/index.vue`.
+    2. **Register Route:** Add the route object to the `children` array of the `BasicLayout` in `src/router/index.ts`. Ensure it has a unique `name`, `path`, and `meta` containing at least `title` and `icon` (imported from `@ant-design/icons-vue`).
+    3. **Update Sidebar:** Manually add a corresponding `<a-menu-item>` to the `<a-menu>` inside `src/layout/BasicLayout.vue`. The `key` of the `<a-menu-item>` **must exactly match** the route's `name` property so that clicking the menu item pushes to the correct route and the active menu state is automatically maintained.
 - **Navigation:** Admin-style Sidebar Menu.
 - **Global Imports:** Ant Design Vue, ECharts, and Axios are already configured and imported globally in `src/main.ts`.
 
