@@ -1,31 +1,24 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import BasicLayout from '../layout/BasicLayout.vue';
+import { layoutRoutes } from './routes';
 
-const routes: Array<RouteRecordRaw> = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: BasicLayout,
     redirect: '/home',
-    children: [
-      {
-        path: 'home',
-        name: 'Home',
-        component: () => import('../views/Home/index.vue'),
-        meta: { title: '首页', icon: 'HomeOutlined' }
-      },
-      {
-        path: 'settings',
-        name: 'Settings',
-        component: () => import('../views/Settings/index.vue'),
-        meta: { title: '设置', icon: 'SettingOutlined' }
-      }
-    ]
-  }
+    children: layoutRoutes,
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.afterEach((to) => {
+  const appTitle = import.meta.env.VITE_APP_TITLE;
+  document.title = to.meta.title ? `${to.meta.title} - ${appTitle}` : appTitle;
 });
 
 export default router;

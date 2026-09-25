@@ -2,21 +2,13 @@
   <a-layout class="app-layout">
     <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible theme="light" class="app-sider">
       <div class="logo">
-        <span v-if="!collapsed" class="logo-text">My Project</span>
-        <span v-else class="logo-text-short">MP</span>
+        <span v-if="!collapsed" class="logo-text">{{ appTitle }}</span>
+        <span v-else class="logo-text-short">{{ appTitle.charAt(0) }}</span>
       </div>
-      <a-menu
-        v-model:selectedKeys="selectedKeys"
-        mode="inline"
-        @click="handleMenuClick"
-      >
-        <a-menu-item key="Home">
-          <template #icon><HomeOutlined /></template>
-          <span>首页</span>
-        </a-menu-item>
-        <a-menu-item key="Settings">
-          <template #icon><SettingOutlined /></template>
-          <span>设置</span>
+      <a-menu :selected-keys="selectedKeys" mode="inline" @click="handleMenuClick">
+        <a-menu-item v-for="item in menuItems" :key="item.key">
+          <template v-if="item.icon" #icon><component :is="item.icon" /></template>
+          <span>{{ item.title }}</span>
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
@@ -41,29 +33,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import {
-  HomeOutlined,
-  SettingOutlined,
-  MenuUnfoldOutlined,
-  MenuFoldOutlined,
-} from '@ant-design/icons-vue';
+import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons-vue';
+import { layoutRoutes } from '../router/routes';
 
+const appTitle = import.meta.env.VITE_APP_TITLE;
 const collapsed = ref<boolean>(false);
-const selectedKeys = ref<string[]>(['Home']);
+
+// 菜单由 router/index.ts 中的 layoutRoutes 生成，key 即路由 name
+const menuItems = layoutRoutes
+  .filter((r) => r.name && !r.meta?.hideInMenu)
+  .map((r) => ({ key: String(r.name), title: r.meta?.title, icon: r.meta?.icon }));
 
 const route = useRoute();
 const router = useRouter();
 
-watch(() => route.name, (newVal) => {
-  if (newVal) {
-    selectedKeys.value = [newVal as string];
-  }
-}, { immediate: true });
+const selectedKeys = computed(() => (route.name ? [String(route.name)] : []));
 
-const handleMenuClick = ({ key }: { key: string }) => {
-  router.push({ name: key });
+const handleMenuClick = ({ key }: { key: string | number }) => {
+  router.push({ name: String(key) });
 };
 </script>
 
