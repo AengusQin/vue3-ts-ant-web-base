@@ -7,10 +7,11 @@ The project is built with a modern frontend stack:
 
 - **Core:** Vue 3, TypeScript, Vite
 - **UI Framework:** Ant Design Vue (globally registered)
-- **Data Visualization:** Apache ECharts (provided globally via `app.provide` and `globalProperties`)
-- **HTTP Client:** Axios (provided globally via `app.provide` and `globalProperties`)
+- **Data Visualization:** Apache ECharts (import directly where needed: `import * as echarts from 'echarts'`)
+- **HTTP Client:** Axios, wrapped as a shared instance in `src/utils/request.ts` (baseURL from env, error toast
+  interceptor). Use `request<T>()` or the default-exported instance; do not call the global `axios` directly.
 
-It is structured to support an Admin-style layout featuring a sidebar menu and manual route configuration.
+It is structured to support an Admin-style layout featuring a sidebar menu generated from the route configuration.
 
 # Building and Running
 
@@ -38,18 +39,18 @@ been installed.
 
 ## Architectural & Structural Choices
 
-- **Routing:** Manual route configuration.
+- **Routing:** Manual route configuration; the sidebar menu is generated from routes automatically.
   - **How to add a new page:**
     1. **Create the Component:** Create your page component in `src/views/<PageName>/index.vue`.
-    2. **Register Route:** Add the route object to the `children` array of the `BasicLayout` in
-       `src/router/index.ts`. Ensure it has a unique `name`, `path`, and `meta` containing at least `title` and
-       `icon` (imported from `@ant-design/icons-vue`).
-    3. **Update Sidebar:** Manually add a corresponding `<a-menu-item>` to the `<a-menu>` inside
-       `src/layout/BasicLayout.vue`. The `key` of the `<a-menu-item>` **must exactly match** the route's `name`
-       property so that clicking the menu item pushes to the correct route and the active menu state is
-       automatically maintained.
+    2. **Register Route:** Add the route object to the `layoutRoutes` array in `src/router/routes.ts` (above the
+       `NotFound` catch-all). Ensure it has a unique `name`, `path`, and `meta` with `title` and `icon` (the icon
+       component itself, imported from `@ant-design/icons-vue`). The sidebar menu is generated from this array in
+       order; do not edit `src/layout/BasicLayout.vue` for menu items. Use `meta.hideInMenu: true` for pages that
+       should not appear in the menu. `meta.title` is also used as the browser tab title.
 - **Navigation:** Admin-style Sidebar Menu.
-- **Global Imports:** Ant Design Vue, ECharts, and Axios are already configured and imported globally in `src/main.ts`.
+- **Global Imports:** Only Ant Design Vue is registered globally in `src/main.ts`.
+- **API & Env:** API prefix is `VITE_API_BASE_URL` (`.env.development` / `.env.production`). In development, requests
+  under that prefix are proxied to `VITE_PROXY_TARGET` (see `vite.config.ts`). App title is `VITE_APP_TITLE` in `.env`.
 
 ## UI/UX & Design Guidelines
 
